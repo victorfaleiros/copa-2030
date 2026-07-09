@@ -7,6 +7,13 @@ Ferramenta de captação de leads da campanha do Instagram: a pessoa cria uma co
 - `index.html`: página pública da campanha (cadastro, login, orçamento e resultado).
 - `admin.html`: painel restrito para ver todos os planos e baixar CSV. Só os e-mails em `ADMIN_EMAILS` (que batem com as policies do banco) enxergam os dados.
 
+## v2 (jul/2026)
+
+- Categorias novas: hospedagem em Lisboa, passagens Brasil-Portugal, jogos da fase de grupos (1 a 3, com referência Brasil x jogo aleatório), jogos do mata-mata, alimentação, aéreos internos, transportes internos e extras.
+- Sugestões de preço em 3 níveis (econômico, médio, premium) por pessoa; clique preenche o campo multiplicando por pessoas (e por jogos).
+- Campo "para quantas pessoas é a viagem".
+- Caixinha: a pessoa marca os aportes feitos mês a mês e acompanha num gráfico o saldo real x planejado (colunas `aportes` e `detalhes` no banco).
+
 ## Como funciona o cálculo
 
 Mesma filosofia do planejamento de aposentadoria da plataforma (`lib/retirement.js` do act-asset-allocation):

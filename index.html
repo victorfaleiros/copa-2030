@@ -67,10 +67,15 @@
     <!-- Tela 2: orcamento da viagem -->
     <section id="tela-plano" class="cartao oculto">
       <h2 id="saudacao">Monte o orçamento da sua viagem</h2>
-      <p class="sub">Preencha quanto você pretende gastar em cada item, em valores de hoje. A gente cuida da inflação e dos juros.</p>
+      <p class="sub">Toque numa sugestão (econômico, médio ou premium) ou digite o seu valor. As sugestões são por pessoa; ao tocar, a gente multiplica pelo seu grupo.</p>
 
       <form id="form-plano">
-        <div id="lista-gastos" class="grade-gastos"></div>
+        <div class="campo campo-pessoas">
+          <label for="pessoas">Para quantas pessoas é a viagem? <span class="dica">conte você e quem vai junto: cônjuge, filhos, pais, amigos</span></label>
+          <select id="pessoas"></select>
+        </div>
+
+        <div id="lista-gastos"></div>
 
         <div class="total-parcial">
           <span>Custo total da viagem</span>
@@ -102,9 +107,39 @@
         <div class="linha ganho"><span>Os juros trabalham por você</span><strong id="res-rendimento"></strong></div>
       </div>
 
-      <button class="botao" id="btn-ajustar" type="button" style="margin-top: 20px;">Ajustar valores</button>
+      <button class="botao" id="btn-acompanhar" type="button" style="margin-top: 20px;">Acompanhar minha caixinha</button>
+      <button class="botao secundario" id="btn-ajustar" type="button">Ajustar valores</button>
       <p class="premissas" id="res-premissas"></p>
       <div class="rodape-sessao"><button id="sair-2" type="button">Sair da conta</button></div>
+    </section>
+
+    <!-- Tela 4: acompanhamento da caixinha -->
+    <section id="tela-caixinha" class="cartao oculto">
+      <h2>Sua caixinha da Copa</h2>
+      <p class="sub">Marque os aportes que você já fez e acompanhe se está no ritmo para junho de 2029.</p>
+
+      <div class="caixinha-kpis">
+        <div class="kpi"><div class="num" id="cx-tem">R$ 0</div><div class="rotulo">Sua caixinha hoje</div></div>
+        <div class="kpi"><div class="num" id="cx-deveria">R$ 0</div><div class="rotulo">Onde você deveria estar</div></div>
+        <div class="kpi"><div class="num" id="cx-status">-</div><div class="rotulo" id="cx-status-rotulo">Situação</div></div>
+      </div>
+
+      <div class="grafico-caixa">
+        <div class="grafico-legenda" id="gr-legenda"></div>
+        <div class="grafico-envolve" id="gr-envolve">
+          <svg id="grafico" viewBox="0 0 640 300" role="img" aria-label="Evolução da caixinha: planejado e realizado"></svg>
+          <div id="gr-tooltip" class="gr-tooltip oculto"></div>
+        </div>
+      </div>
+
+      <h3 class="titulo-aportes">Seus aportes</h3>
+      <p class="sub" id="aportes-vazio" style="display:none;">Seu primeiro aporte é no mês que vem. Volte aqui para marcar quando fizer!</p>
+      <div id="lista-aportes"></div>
+
+      <button class="botao" id="btn-salvar-aportes" type="button">Salvar meus aportes</button>
+      <button class="botao secundario" id="btn-voltar-resultado" type="button">Voltar ao meu plano</button>
+      <p id="msg-caixinha" class="mensagem"></p>
+      <div class="rodape-sessao"><button id="sair-3" type="button">Sair da conta</button></div>
     </section>
 
   </main>
