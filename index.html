@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comunidade Copa 2030 | Seu plano para viver a Copa</title>
+  <meta name="description" content="Descubra quanto guardar por mês para realizar o sonho de ir à Copa do Mundo de 2030.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+</head>
+<body>
+
+  <header class="topo">
+    <span class="selo">Comunidade Copa 2030</span>
+    <h1>Seu plano para viver a <span class="destaque">Copa de 2030</span></h1>
+    <p>Monte o orçamento da sua viagem e descubra quanto guardar por mês para chegar em 2030 com tudo pago.</p>
+  </header>
+
+  <main class="container">
+
+    <!-- Tela 1: entrar ou criar conta -->
+    <section id="tela-auth" class="cartao oculto">
+      <div class="abas">
+        <button id="aba-cadastro" class="ativa" type="button">Criar conta</button>
+        <button id="aba-login" type="button">Já tenho conta</button>
+      </div>
+
+      <form id="form-cadastro">
+        <div class="campo">
+          <label for="cad-nome">Seu nome</label>
+          <input id="cad-nome" type="text" autocomplete="name" required placeholder="Como você quer ser chamado">
+        </div>
+        <div class="campo">
+          <label for="cad-whatsapp">WhatsApp</label>
+          <input id="cad-whatsapp" type="tel" autocomplete="tel" inputmode="tel" required placeholder="(11) 99999-9999">
+        </div>
+        <div class="campo">
+          <label for="cad-email">E-mail</label>
+          <input id="cad-email" type="email" autocomplete="email" required placeholder="voce@email.com">
+        </div>
+        <div class="campo">
+          <label for="cad-senha">Crie uma senha</label>
+          <input id="cad-senha" type="password" autocomplete="new-password" required minlength="6" placeholder="Mínimo de 6 caracteres">
+        </div>
+        <label class="consentimento">
+          <input id="cad-contato" type="checkbox" checked>
+          <span>Quero receber conteúdos e novidades da Comunidade Copa 2030 no meu WhatsApp e e-mail.</span>
+        </label>
+        <button class="botao" type="submit">Começar meu plano</button>
+        <p id="msg-cadastro" class="mensagem"></p>
+      </form>
+
+      <form id="form-login" class="oculto">
+        <div class="campo">
+          <label for="log-email">E-mail</label>
+          <input id="log-email" type="email" autocomplete="email" required placeholder="voce@email.com">
+        </div>
+        <div class="campo">
+          <label for="log-senha">Senha</label>
+          <input id="log-senha" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="botao" type="submit">Entrar</button>
+        <p id="msg-login" class="mensagem"></p>
+      </form>
+    </section>
+
+    <!-- Tela 2: orcamento da viagem -->
+    <section id="tela-plano" class="cartao oculto">
+      <h2 id="saudacao">Monte o orçamento da sua viagem</h2>
+      <p class="sub">Preencha quanto você pretende gastar em cada item, em valores de hoje. A gente cuida da inflação e dos juros.</p>
+
+      <form id="form-plano">
+        <div id="lista-gastos" class="grade-gastos"></div>
+
+        <div class="total-parcial">
+          <span>Custo total da viagem</span>
+          <strong id="total-viagem">R$ 0</strong>
+        </div>
+
+        <div class="campo" style="margin-top: 14px;">
+          <label for="poupanca">Quanto você já tem guardado para esse sonho? <span class="dica">Pode ser zero, todo mundo começa de algum lugar.</span></label>
+          <div class="prefixo"><span>R$</span><input id="poupanca" type="text" inputmode="numeric" placeholder="0"></div>
+        </div>
+
+        <button class="botao" type="submit">Calcular meu plano</button>
+        <p id="msg-plano" class="mensagem"></p>
+      </form>
+      <div class="rodape-sessao"><button id="sair-1" type="button">Sair da conta</button></div>
+    </section>
+
+    <!-- Tela 3: resultado -->
+    <section id="tela-resultado" class="cartao resultado oculto">
+      <p class="rotulo">Para viver a Copa de 2030, guarde por mês</p>
+      <div class="valorao" id="res-aporte">R$ 0</div>
+      <p class="prazo">todo mês até <strong id="res-prazo">junho de 2029</strong>, um ano antes da Copa, para garantir tudo com antecedência</p>
+
+      <div class="detalhes">
+        <div class="linha"><span>Custo da viagem hoje</span><strong id="res-hoje"></strong></div>
+        <div class="linha"><span>Custo corrigido pela inflação até 2029</span><strong id="res-corrigido"></strong></div>
+        <div class="linha"><span>Você já tem guardado</span><strong id="res-ja-tem"></strong></div>
+        <div class="linha"><span>Total que você vai aportar</span><strong id="res-aportado"></strong></div>
+        <div class="linha ganho"><span>Os juros trabalham por você</span><strong id="res-rendimento"></strong></div>
+      </div>
+
+      <button class="botao" id="btn-ajustar" type="button" style="margin-top: 20px;">Ajustar valores</button>
+      <p class="premissas" id="res-premissas"></p>
+      <div class="rodape-sessao"><button id="sair-2" type="button">Sair da conta</button></div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="assets/config.js"></script>
+  <script src="assets/calc.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

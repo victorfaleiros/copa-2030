@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copa 2030 | Painel</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+</head>
+<body>
+
+  <header class="topo">
+    <span class="selo">Painel da campanha</span>
+    <h1>Planos da <span class="destaque">Comunidade Copa 2030</span></h1>
+  </header>
+
+  <main class="container largo">
+
+    <section id="tela-login" class="cartao oculto" style="max-width: 480px; margin-left: auto; margin-right: auto;">
+      <h2>Acesso restrito</h2>
+      <p class="sub">Entre com a sua conta de administrador.</p>
+      <form id="form-login">
+        <div class="campo">
+          <label for="log-email">E-mail</label>
+          <input id="log-email" type="email" autocomplete="email" required>
+        </div>
+        <div class="campo">
+          <label for="log-senha">Senha</label>
+          <input id="log-senha" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="botao" type="submit">Entrar</button>
+        <p id="msg-login" class="mensagem"></p>
+      </form>
+    </section>
+
+    <section id="tela-painel" class="oculto">
+      <div class="admin-kpis">
+        <div class="kpi"><div class="num" id="kpi-leads">0</div><div class="rotulo">Leads</div></div>
+        <div class="kpi"><div class="num" id="kpi-aportes">R$ 0</div><div class="rotulo">Aportes mensais somados</div></div>
+        <div class="kpi"><div class="num" id="kpi-ticket">R$ 0</div><div class="rotulo">Viagem média (hoje)</div></div>
+      </div>
+
+      <div class="admin-acoes">
+        <button class="botao" id="btn-csv" type="button">Baixar CSV</button>
+        <button class="botao secundario" id="btn-sair" type="button" style="margin-top: 0;">Sair</button>
+      </div>
+
+      <div class="tabela-envolve">
+        <table class="planos">
+          <thead id="cabecalho"></thead>
+          <tbody id="linhas"></tbody>
+        </table>
+      </div>
+      <p class="premissas" id="vazio" style="display:none;">Nenhum plano por enquanto. Compartilhe o link da campanha!</p>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="assets/config.js"></script>
+  <script src="assets/admin.js"></script>
+</body>
+</html>
