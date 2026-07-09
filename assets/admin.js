@@ -48,11 +48,14 @@ function render() {
     { titulo: 'E-mail', f: p => p.email },
     { titulo: 'WhatsApp', f: p => p.whatsapp || '' },
     { titulo: 'Contato ok', f: p => p.aceita_contato ? 'Sim' : 'Não' },
+    { titulo: 'Pessoas', f: p => p.pessoas || 1, num: true },
     ...CATEGORIAS.map(c => ({ titulo: c.nome, f: p => fmtBRL.format((p.gastos && p.gastos[c.id]) || 0), num: true })),
     { titulo: 'Viagem (hoje)', f: p => fmtBRL.format(p.total_hoje || 0), num: true },
     { titulo: 'Corrigido 2029', f: p => fmtBRL.format(p.total_corrigido || 0), num: true },
     { titulo: 'Já guardado', f: p => fmtBRL.format(p.poupanca_inicial || 0), num: true },
     { titulo: 'Aporte/mês', f: p => fmtBRL.format(p.aporte_mensal || 0), num: true },
+    { titulo: 'Aportes feitos', f: p => Object.keys(p.aportes || {}).length, num: true },
+    { titulo: 'Total aportado', f: p => fmtBRL.format(Object.values(p.aportes || {}).reduce((s, v) => s + Number(v || 0), 0)), num: true },
     { titulo: 'Criado em', f: p => fmtData.format(new Date(p.created_at)) },
     { titulo: 'Atualizado', f: p => fmtData.format(new Date(p.updated_at)) },
   ];
@@ -69,12 +72,16 @@ function escapar(s) {
 }
 
 $('btn-csv').addEventListener('click', () => {
-  const cab = ['nome', 'email', 'whatsapp', 'aceita_contato', ...CATEGORIAS.map(c => c.id),
-    'total_hoje', 'total_corrigido', 'poupanca_inicial', 'aporte_mensal', 'meses', 'created_at', 'updated_at'];
+  const cab = ['nome', 'email', 'whatsapp', 'aceita_contato', 'pessoas', ...CATEGORIAS.map(c => c.id),
+    'total_hoje', 'total_corrigido', 'poupanca_inicial', 'aporte_mensal', 'meses',
+    'aportes_feitos', 'total_aportado', 'created_at', 'updated_at'];
   const linhas = planos.map(p => [
-    p.nome, p.email, p.whatsapp || '', p.aceita_contato ? 'sim' : 'nao',
+    p.nome, p.email, p.whatsapp || '', p.aceita_contato ? 'sim' : 'nao', p.pessoas || 1,
     ...CATEGORIAS.map(c => (p.gastos && p.gastos[c.id]) || 0),
-    p.total_hoje, p.total_corrigido, p.poupanca_inicial, p.aporte_mensal, p.meses, p.created_at, p.updated_at,
+    p.total_hoje, p.total_corrigido, p.poupanca_inicial, p.aporte_mensal, p.meses,
+    Object.keys(p.aportes || {}).length,
+    Object.values(p.aportes || {}).reduce((s, v) => s + Number(v || 0), 0),
+    p.created_at, p.updated_at,
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
   const csv = '﻿' + cab.join(';') + '\n' + linhas.join('\n');
   const a = document.createElement('a');

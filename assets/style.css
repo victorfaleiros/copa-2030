@@ -124,6 +124,59 @@ body {
 
 .oculto { display: none !important; }
 
+/* Pessoas e quantidade de jogos */
+.campo-pessoas select, .qtd-linha select {
+  padding: 11px 14px; font-size: 15px; border: 1.5px solid #d7e0da;
+  border-radius: 10px; background: #fbfdfc; color: var(--texto); outline: none;
+}
+.campo-pessoas select { width: 100%; }
+.qtd-linha { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; font-size: 14px; color: var(--texto-suave); }
+
+/* Sugestoes de preco */
+.campo-gasto { padding: 14px 0 6px; border-top: 1px solid #edf1ee; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }
+.chips-rotulo { font-size: 12.5px; color: var(--texto-suave); min-width: 118px; }
+.chip {
+  border: 1px solid #d7e0da; background: #f2f6f3; color: var(--texto-suave);
+  border-radius: 999px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+}
+.chip b { color: var(--verde); font-size: 12.5px; }
+.chip:hover { border-color: var(--verde-claro); background: #e9f2ec; }
+.chips-nota { font-size: 11.5px; color: var(--texto-suave); margin: 0 0 8px; }
+
+/* Caixinha */
+.caixinha-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+.caixinha-kpis .kpi { padding: 12px 8px; box-shadow: none; border: 1px solid #edf1ee; }
+.caixinha-kpis .num { font-size: 17px; }
+.caixinha-kpis .num.ok { color: var(--verde-claro); }
+.caixinha-kpis .num.atencao { color: #b3701a; }
+.titulo-aportes { font-size: 16px; margin: 18px 0 8px; }
+.aporte-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #edf1ee; }
+.aporte-check { display: flex; align-items: center; gap: 9px; font-size: 14.5px; }
+.aporte-check input { width: 19px; height: 19px; accent-color: var(--verde-claro); }
+.aporte-valor { width: 150px; }
+.aporte-valor input { padding: 8px 10px; font-size: 14.5px; }
+.aporte-valor input:disabled { opacity: 0.45; background: #f2f4f2; }
+#btn-salvar-aportes { margin-top: 16px; }
+
+/* Grafico */
+.grafico-caixa { background: #ffffff; border: 1px solid #edf1ee; border-radius: 12px; padding: 12px 10px 6px; }
+.grafico-legenda { display: flex; gap: 16px; padding: 0 6px 8px; font-size: 12.5px; color: var(--texto-suave); }
+.lg-item { display: inline-flex; align-items: center; gap: 6px; }
+.lg-chave { display: inline-block; width: 14px; height: 3px; border-radius: 2px; }
+.grafico-envolve { position: relative; }
+#grafico { width: 100%; height: auto; display: block; }
+.gr-tick { font-size: 10.5px; fill: #898781; font-family: inherit; }
+.gr-rotulo { font-size: 11px; fill: #52514e; font-weight: 600; font-family: inherit; }
+.gr-tooltip {
+  position: absolute; background: #ffffff; border: 1px solid #e1e0d9; border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(7, 48, 31, 0.12); padding: 8px 10px; font-size: 12px;
+  pointer-events: none; z-index: 5; min-width: 130px;
+}
+.tt-titulo { color: var(--texto-suave); margin-bottom: 4px; }
+.tt-linha { display: flex; align-items: center; gap: 6px; padding: 1px 0; color: var(--texto-suave); }
+.tt-linha b { color: var(--texto); font-variant-numeric: tabular-nums; }
+
 /* Painel admin */
 .admin-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
 .kpi { background: var(--branco); border-radius: 12px; box-shadow: var(--sombra); padding: 16px; text-align: center; }

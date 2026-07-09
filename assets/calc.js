@@ -11,11 +11,11 @@ function taxaDoAno(tabela, ano) {
   return tabela[anos[anos.length - 1]];
 }
 
-// Lista dos meses entre hoje (exclusivo) e a data-alvo (inclusivo)
-function mesesAteAlvo(hoje, alvo) {
+// Lista dos meses entre inicio (exclusivo) e alvo (inclusivo)
+function mesesEntre(inicio, alvo) {
   const meses = [];
-  let ano = hoje.getFullYear();
-  let mes = hoje.getMonth() + 1; // 1-12
+  let ano = inicio.ano;
+  let mes = inicio.mes;
   while (ano < alvo.ano || (ano === alvo.ano && mes < alvo.mes)) {
     mes += 1;
     if (mes > 12) { mes = 1; ano += 1; }
@@ -24,12 +24,14 @@ function mesesAteAlvo(hoje, alvo) {
   return meses;
 }
 
+function chaveMes(m) { return m.ano + '-' + String(m.mes).padStart(2, '0'); }
+
 // totalHoje: soma dos gastos em R$ de hoje
 // poupancaInicial: quanto ja tem guardado
+// inicio: {ano, mes} de criacao do plano (aportes comecam no mes seguinte)
 // Retorna aporte mensal para chegar ao total corrigido pela inflacao ate jun/2029, rendendo 100% do CDI.
-function calcularPlano({ totalHoje, poupancaInicial, premissas, hoje }) {
-  const agora = hoje || new Date();
-  const meses = mesesAteAlvo(agora, premissas.dataAlvo);
+function calcularPlano({ totalHoje, poupancaInicial, premissas, inicio }) {
+  const meses = mesesEntre(inicio, premissas.dataAlvo);
   const n = meses.length;
 
   // Corrige o custo da viagem pela inflacao (Focus IPCA) ate a data-alvo
@@ -45,7 +47,7 @@ function calcularPlano({ totalHoje, poupancaInicial, premissas, hoje }) {
   }
 
   let aporte = 0;
-  if (n > 0 && simular(0) < totalCorrigido) {
+  if (n > 0 && totalHoje > 0 && simular(0) < totalCorrigido) {
     let lo = 0, hi = Math.max(totalCorrigido / n * 2, 100);
     while (simular(hi) < totalCorrigido) hi *= 2;
     for (let i = 0; i < 100; i++) {
@@ -72,4 +74,18 @@ function calcularPlano({ totalHoje, poupancaInicial, premissas, hoje }) {
   };
 }
 
-if (typeof module !== 'undefined') module.exports = { calcularPlano, mesesAteAlvo, taxaMensal };
+// Serie de saldos mes a mes, do inicio ate o alvo.
+// aportePorMes(chave 'YYYY-MM') deve devolver o valor aportado naquele mes (ou 0).
+// Devolve [{ano, mes, saldo}], comecando pelo ponto inicial (saldo = poupancaInicial).
+function serieSaldo({ poupancaInicial, premissas, inicio, aportePorMes }) {
+  const meses = mesesEntre(inicio, premissas.dataAlvo);
+  const serie = [{ ano: inicio.ano, mes: inicio.mes, saldo: poupancaInicial }];
+  let p = poupancaInicial;
+  for (const m of meses) {
+    p = p * (1 + taxaMensal(taxaDoAno(premissas.cdi, m.ano))) + (aportePorMes(chaveMes(m)) || 0);
+    serie.push({ ano: m.ano, mes: m.mes, saldo: p });
+  }
+  return serie;
+}
+
+if (typeof module !== 'undefined') module.exports = { calcularPlano, mesesEntre, chaveMes, serieSaldo, taxaMensal };
