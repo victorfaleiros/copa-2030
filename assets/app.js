@@ -318,8 +318,10 @@ function montarTabela() {
     tdSaldoPlan.className = 'num saldo-plan';
     const tdSaldoReal = document.createElement('td');
     tdSaldoReal.className = 'num saldo-real';
+    tdMeu.classList.add('div-grupo');
 
-    tr.append(tdMes, tdPlano, tdMeu, tdSaldoPlan, tdSaldoReal);
+    // ordem: Mes | Planejado (aporte, saldo) | Realizado (aporte, saldo no fim do mes)
+    tr.append(tdMes, tdPlano, tdSaldoPlan, tdMeu, tdSaldoReal);
     corpo.appendChild(tr);
   });
 }
@@ -331,9 +333,9 @@ function atualizarTabelaCalculada(c) {
   const linhas = $('linhas-aportes').children;
   for (let i = 0; i < linhas.length; i++) {
     const tr = linhas[i];
-    const tds = tr.children;
+    const tds = tr.children; // [0] mes | [1] aporte plano | [2] saldo plano | [3] meu aporte | [4] saldo real
     tds[1].textContent = fmtBRL.format(c.r.aporte);
-    tds[3].textContent = fmtBRL.format(Math.round(c.plan[i + 1].saldo));
+    tds[2].textContent = fmtBRL.format(Math.round(c.plan[i + 1].saldo));
     const mostrar = i + 1 <= c.idxUltimo;
     tds[4].textContent = mostrar ? fmtBRL.format(Math.round(c.real[i + 1].saldo)) : '—';
     tds[4].classList.toggle('sem-aporte', !mostrar);

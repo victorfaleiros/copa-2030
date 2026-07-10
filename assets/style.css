@@ -235,6 +235,14 @@ table.planos th {
   background: var(--pagina); color: var(--tinta-suave); position: sticky; top: 0; z-index: 2;
   font-weight: 600; font-size: 12px; letter-spacing: 0.02em;
 }
+/* cabecalho em dois niveis: Planejado | Realizado */
+table.planos thead tr:first-child th { height: 34px; padding-top: 7px; padding-bottom: 7px; }
+table.planos th.th-grupo { text-align: center; font-size: 12.5px; font-weight: 700; color: var(--tinta); }
+table.planos th.th-grupo .lg-chave { margin-right: 7px; vertical-align: 2px; }
+.chave-plan { background: var(--c-plan); }
+.chave-real { background: var(--c-real); }
+table.planos thead tr:nth-child(2) th { top: 34px; }
+table.planos .div-grupo { border-left: 1px solid var(--borda-forte); }
 table.planos td.num, table.planos th.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.planos tr:last-child td { border-bottom: none; }
 tr.mes-atual td { background: var(--verde-100); }
