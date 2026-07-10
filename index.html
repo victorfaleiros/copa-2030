@@ -191,7 +191,15 @@
         <div class="tabela-envolve tabela-aportes">
           <table class="planos">
             <thead>
-              <tr><th>Mês</th><th class="num">Aporte do plano</th><th class="num">Meu aporte</th><th class="num">Saldo planejado</th><th class="num">Minha caixinha</th></tr>
+              <tr>
+                <th rowspan="2" class="th-mes">Mês</th>
+                <th colspan="2" class="th-grupo"><span class="lg-chave chave-plan"></span>Planejado</th>
+                <th colspan="2" class="th-grupo div-grupo"><span class="lg-chave chave-real"></span>Realizado</th>
+              </tr>
+              <tr>
+                <th class="num th-sub">Aporte</th><th class="num th-sub">Saldo</th>
+                <th class="num th-sub div-grupo">Aporte</th><th class="num th-sub" title="Saldo no fechamento do mês">Saldo no fim do mês</th>
+              </tr>
             </thead>
             <tbody id="linhas-aportes"></tbody>
           </table>
