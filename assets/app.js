@@ -200,7 +200,15 @@ function calcularTudo() {
   const plan = serieSaldo({ poupancaInicial: poupanca, premissas: PREMISSAS, inicio: ini, aportePorMes: () => r.aporte });
   const real = serieSaldo({ poupancaInicial: poupanca, premissas: PREMISSAS, inicio: ini, aportePorMes: (k) => Number(aportesAtuais[k]) || 0 });
   const idxAtual = Math.max(0, Math.min(cmpMes(agora, ini), plan.length - 1));
-  return { r, gastos, plan, real, idxAtual, ini, agora };
+  // ate onde desenhar a linha da caixinha: hoje ou o ultimo mes futuro ja preenchido
+  let idxUltimo = idxAtual;
+  for (const k of Object.keys(aportesAtuais)) {
+    if (!Number(aportesAtuais[k])) continue;
+    const [a, m] = k.split('-').map(Number);
+    const idx = cmpMes({ ano: a, mes: m }, ini);
+    if (idx > idxUltimo && idx <= plan.length - 1) idxUltimo = idx;
+  }
+  return { r, gastos, plan, real, idxAtual, idxUltimo, ini, agora };
 }
 
 function atualizarCalculos() {
@@ -224,7 +232,7 @@ function atualizarCalculos() {
   $('res-rendimento').textContent = '+ ' + fmtBRL.format(c.r.rendimento);
   $('res-meses').textContent = c.r.meses - c.idxAtual;
   // grafico e colunas calculadas da tabela
-  desenharGrafico(c.plan, c.real, c.idxAtual);
+  desenharGrafico(c.plan, c.real, c.idxAtual, c.idxUltimo);
   atualizarTabelaCalculada(c);
 }
 
@@ -269,8 +277,8 @@ function montarTabela() {
   const meses = mesesEntre(ini, PREMISSAS.dataAlvo);
   const corpo = $('linhas-aportes');
   corpo.textContent = '';
+  $('aportes-vazio').style.display = 'none';
   const passados = meses.filter(m => cmpMes(m, agora) <= 0).length;
-  $('aportes-vazio').style.display = passados ? 'none' : 'block';
 
   meses.forEach((m, i) => {
     const k = chaveMes(m);
@@ -283,33 +291,29 @@ function montarTabela() {
     const tdMes = document.createElement('td');
     tdMes.textContent = `${MESES_ABREV[m.mes - 1]}/${m.ano}`;
     const tdPlano = document.createElement('td');
-    tdPlano.className = 'num' + (passado ? ' plano-copiavel' : '');
-    if (passado) tdPlano.title = 'Copiar para "Meu aporte"';
+    tdPlano.className = 'num plano-copiavel';
+    tdPlano.title = 'Copiar para "Meu aporte"';
     const tdMeu = document.createElement('td');
     tdMeu.className = 'num';
-    if (passado) {
-      const input = document.createElement('input');
-      input.className = 'aporte-input';
-      input.type = 'text';
-      input.inputMode = 'numeric';
-      input.placeholder = '0';
-      input.dataset.valor = k;
-      if (aportesAtuais[k] != null) aplicarValor(input, Number(aportesAtuais[k]));
-      input.addEventListener('input', () => {
-        aplicarValor(input, lerValor(input));
-        const v = lerValor(input);
-        if (input.value === '') delete aportesAtuais[k]; else aportesAtuais[k] = v;
-        atualizarCalculos();
-      });
-      tdMeu.appendChild(input);
-      tdPlano.addEventListener('click', () => {
-        aplicarValor(input, planoDaVez);
-        aportesAtuais[k] = planoDaVez;
-        atualizarCalculos();
-      });
-    } else {
-      tdMeu.innerHTML = '<span class="sem-aporte">—</span>';
-    }
+    const input = document.createElement('input');
+    input.className = 'aporte-input';
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.placeholder = '0';
+    input.dataset.valor = k;
+    if (aportesAtuais[k] != null) aplicarValor(input, Number(aportesAtuais[k]));
+    input.addEventListener('input', () => {
+      aplicarValor(input, lerValor(input));
+      const v = lerValor(input);
+      if (input.value === '') delete aportesAtuais[k]; else aportesAtuais[k] = v;
+      atualizarCalculos();
+    });
+    tdMeu.appendChild(input);
+    tdPlano.addEventListener('click', () => {
+      aplicarValor(input, planoDaVez);
+      aportesAtuais[k] = planoDaVez;
+      atualizarCalculos();
+    });
     const tdSaldoPlan = document.createElement('td');
     tdSaldoPlan.className = 'num saldo-plan';
     const tdSaldoReal = document.createElement('td');
@@ -330,9 +334,9 @@ function atualizarTabelaCalculada(c) {
     const tds = tr.children;
     tds[1].textContent = fmtBRL.format(c.r.aporte);
     tds[3].textContent = fmtBRL.format(Math.round(c.plan[i + 1].saldo));
-    const passado = i + 1 <= c.idxAtual;
-    tds[4].textContent = passado ? fmtBRL.format(Math.round(c.real[i + 1].saldo)) : '—';
-    if (!passado) tds[4].classList.add('sem-aporte');
+    const mostrar = i + 1 <= c.idxUltimo;
+    tds[4].textContent = mostrar ? fmtBRL.format(Math.round(c.real[i + 1].saldo)) : '—';
+    tds[4].classList.toggle('sem-aporte', !mostrar);
   }
 }
 
@@ -377,12 +381,13 @@ function fmtMil(v) {
   return fmtNum.format(Math.round(v / 100) / 10).replace(/,0$/, '') + ' mil';
 }
 
-function desenharGrafico(plan, real, idxAtual) {
+function desenharGrafico(plan, real, idxAtual, idxUltimo) {
+  if (idxUltimo == null) idxUltimo = idxAtual;
   const svg = $('grafico');
   const W = 640, H = 330, ml = 58, mr = 16, mt = 16, mb = 32;
   const iw = W - ml - mr, ih = H - mt - mb;
   const n = plan.length;
-  const ymax = Math.max(plan[n - 1].saldo, real[idxAtual].saldo, 1);
+  const ymax = Math.max(plan[n - 1].saldo, real[idxUltimo].saldo, 1);
   const passo = nivelBom(ymax);
   const ytop = Math.ceil(ymax / passo) * passo;
   const X = (i) => ml + (i / (n - 1)) * iw;
@@ -401,14 +406,14 @@ function desenharGrafico(plan, real, idxAtual) {
     s += `<text x="${X(i)}" y="${H - 9}" text-anchor="middle" class="gr-tick">${MESES_ABREV[p.mes - 1]}/${String(p.ano).slice(2)}</text>`;
   }
   const caminho = (serie, ate) => serie.slice(0, ate + 1).map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(p.saldo).toFixed(1)}`).join('');
-  s += `<path d="${caminho(real, idxAtual)}L${X(idxAtual)},${Y(0)}L${X(0)},${Y(0)}Z" fill="url(#gr-wash)"/>`;
+  s += `<path d="${caminho(real, idxUltimo)}L${X(idxUltimo)},${Y(0)}L${X(0)},${Y(0)}Z" fill="url(#gr-wash)"/>`;
   s += `<path d="${caminho(plan, n - 1)}" fill="none" stroke="${COR_PLAN}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-  s += `<path d="${caminho(real, idxAtual)}" fill="none" stroke="${COR_REAL}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-  s += `<circle cx="${X(idxAtual)}" cy="${Y(real[idxAtual].saldo)}" r="6.5" fill="#ffffff"/>`;
-  s += `<circle cx="${X(idxAtual)}" cy="${Y(real[idxAtual].saldo)}" r="4.5" fill="${COR_REAL}"/>`;
+  s += `<path d="${caminho(real, idxUltimo)}" fill="none" stroke="${COR_REAL}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  s += `<circle cx="${X(idxUltimo)}" cy="${Y(real[idxUltimo].saldo)}" r="6.5" fill="#ffffff"/>`;
+  s += `<circle cx="${X(idxUltimo)}" cy="${Y(real[idxUltimo].saldo)}" r="4.5" fill="${COR_REAL}"/>`;
   s += `<text x="${W - mr}" y="${Y(plan[n - 1].saldo) - 8}" text-anchor="end" class="gr-rotulo">meta ${fmtBRL.format(plan[n - 1].saldo)}</text>`;
-  const lx = Math.min(X(idxAtual) + 9, W - mr - 70);
-  s += `<text x="${lx}" y="${Y(real[idxAtual].saldo) + (idxAtual < 3 ? -12 : 21)}" class="gr-rotulo">${fmtBRL.format(real[idxAtual].saldo)}</text>`;
+  const lx = Math.min(X(idxUltimo) + 9, W - mr - 70);
+  s += `<text x="${lx}" y="${Y(real[idxUltimo].saldo) + (idxUltimo < 3 ? -12 : 21)}" class="gr-rotulo">${fmtBRL.format(real[idxUltimo].saldo)}</text>`;
   s += `<line id="gr-mira" x1="0" y1="${mt}" x2="0" y2="${mt + ih}" stroke="#7c8a80" stroke-width="1" opacity="0"/>`;
   s += `<rect id="gr-hit" x="${ml}" y="${mt}" width="${iw}" height="${ih}" fill="transparent"/>`;
   svg.innerHTML = s;
@@ -428,7 +433,7 @@ function desenharGrafico(plan, real, idxAtual) {
     t.textContent = `${MESES_NOME[plan[i].mes - 1]}/${plan[i].ano}`;
     tt.appendChild(t);
     const linhas = [[fmtBRL.format(Math.round(plan[i].saldo)), 'planejado', COR_PLAN]];
-    if (i <= idxAtual) linhas.unshift([fmtBRL.format(Math.round(real[i].saldo)), 'sua caixinha', COR_REAL]);
+    if (i <= idxUltimo) linhas.unshift([fmtBRL.format(Math.round(real[i].saldo)), 'sua caixinha', COR_REAL]);
     for (const [valor, nome, cor] of linhas) {
       const l = document.createElement('div');
       l.className = 'tt-linha';
