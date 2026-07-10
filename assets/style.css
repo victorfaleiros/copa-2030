@@ -255,6 +255,7 @@ td.plano-copiavel:hover { color: var(--verde-700); }
   font-variant-numeric: tabular-nums;
 }
 .aporte-input:focus { border-color: var(--verde-600); box-shadow: 0 0 0 3px rgba(23, 114, 74, 0.14); }
+.saldo-input { width: 130px; }
 td .sem-aporte { color: var(--tinta-muda); }
 
 /* ---------- admin (mantido) ---------- */

@@ -18,6 +18,7 @@ function mostrar(tela) {
 let usuarioAtual = null;
 let planoAtual = null;      // linha do banco (ou null)
 let aportesAtuais = {};     // copia de trabalho editada na tabela {YYYY-MM: valor}
+let saldosAtuais = {};      // saldo informado no fechamento do mes {YYYY-MM: valor}
 
 function mesAtual() { const d = new Date(); return { ano: d.getFullYear(), mes: d.getMonth() + 1 }; }
 function cmpMes(a, b) { return (a.ano - b.ano) * 12 + (a.mes - b.mes); }
@@ -153,7 +154,7 @@ $('form-login').addEventListener('submit', async (e) => {
 
 $('btn-sair').addEventListener('click', async () => {
   await supa.auth.signOut();
-  usuarioAtual = null; planoAtual = null; aportesAtuais = {};
+  usuarioAtual = null; planoAtual = null; aportesAtuais = {}; saldosAtuais = {};
   mostrar('tela-auth');
 });
 
@@ -167,6 +168,7 @@ async function entrarNoPainel(user) {
   const { data: plano } = await supa.from('copa_planos').select('*').eq('user_id', user.id).maybeSingle();
   planoAtual = plano || null;
   aportesAtuais = (plano && { ...plano.aportes }) || {};
+  saldosAtuais = (plano && { ...plano.saldos }) || {};
 
   if (plano) {
     const gastos = { ...(plano.gastos || {}) };
@@ -198,12 +200,16 @@ function calcularTudo() {
   const agora = mesAtual();
   const r = calcularPlano({ totalHoje: total, poupancaInicial: poupanca, premissas: PREMISSAS, inicio: ini });
   const plan = serieSaldo({ poupancaInicial: poupanca, premissas: PREMISSAS, inicio: ini, aportePorMes: () => r.aporte });
-  const real = serieSaldo({ poupancaInicial: poupanca, premissas: PREMISSAS, inicio: ini, aportePorMes: (k) => Number(aportesAtuais[k]) || 0 });
+  const real = serieSaldo({
+    poupancaInicial: poupanca, premissas: PREMISSAS, inicio: ini,
+    aportePorMes: (k) => Number(aportesAtuais[k]) || 0,
+    saldoPorMes: (k) => (saldosAtuais[k] != null ? Number(saldosAtuais[k]) : null),
+  });
   const idxAtual = Math.max(0, Math.min(cmpMes(agora, ini), plan.length - 1));
   // ate onde desenhar a linha da caixinha: hoje ou o ultimo mes futuro ja preenchido
   let idxUltimo = idxAtual;
-  for (const k of Object.keys(aportesAtuais)) {
-    if (!Number(aportesAtuais[k])) continue;
+  for (const k of [...Object.keys(aportesAtuais), ...Object.keys(saldosAtuais)]) {
+    if (!(Number(aportesAtuais[k]) || saldosAtuais[k] != null)) continue;
     const [a, m] = k.split('-').map(Number);
     const idx = cmpMes({ ano: a, mes: m }, ini);
     if (idx > idxUltimo && idx <= plan.length - 1) idxUltimo = idx;
@@ -261,6 +267,7 @@ $('form-plano').addEventListener('submit', async (e) => {
     meses: c.r.meses,
     detalhes,
     aportes: aportesAtuais,
+    saldos: saldosAtuais,
     premissas: { boletim: PREMISSAS.boletim, cdi: PREMISSAS.cdi, ipca: PREMISSAS.ipca, dataAlvo: PREMISSAS.dataAlvo },
   };
   const { data, error } = await supa.from('copa_planos').upsert(linha, { onConflict: 'user_id' }).select().maybeSingle();
@@ -318,6 +325,18 @@ function montarTabela() {
     tdSaldoPlan.className = 'num saldo-plan';
     const tdSaldoReal = document.createElement('td');
     tdSaldoReal.className = 'num saldo-real';
+    const inputSaldo = document.createElement('input');
+    inputSaldo.className = 'aporte-input saldo-input';
+    inputSaldo.type = 'text';
+    inputSaldo.inputMode = 'numeric';
+    inputSaldo.dataset.saldo = k;
+    if (saldosAtuais[k] != null) aplicarValor(inputSaldo, Number(saldosAtuais[k]));
+    inputSaldo.addEventListener('input', () => {
+      aplicarValor(inputSaldo, lerValor(inputSaldo));
+      if (inputSaldo.value === '') delete saldosAtuais[k]; else saldosAtuais[k] = lerValor(inputSaldo);
+      atualizarCalculos();
+    });
+    tdSaldoReal.appendChild(inputSaldo);
     tdMeu.classList.add('div-grupo');
 
     // ordem: Mes | Planejado (aporte, saldo) | Realizado (aporte, saldo no fim do mes)
@@ -336,9 +355,10 @@ function atualizarTabelaCalculada(c) {
     const tds = tr.children; // [0] mes | [1] aporte plano | [2] saldo plano | [3] meu aporte | [4] saldo real
     tds[1].textContent = fmtBRL.format(c.r.aporte);
     tds[2].textContent = fmtBRL.format(Math.round(c.plan[i + 1].saldo));
+    // saldo realizado e editavel: o valor digitado fica no input, o calculado vira placeholder
+    const inputSaldo = tds[4].querySelector('input');
     const mostrar = i + 1 <= c.idxUltimo;
-    tds[4].textContent = mostrar ? fmtBRL.format(Math.round(c.real[i + 1].saldo)) : '—';
-    tds[4].classList.toggle('sem-aporte', !mostrar);
+    if (inputSaldo) inputSaldo.placeholder = mostrar ? fmtNum.format(Math.round(c.real[i + 1].saldo)) : '—';
   }
 }
 
@@ -346,10 +366,11 @@ $('btn-salvar-aportes').addEventListener('click', async () => {
   if (!planoAtual) return avisar('msg-caixinha', 'Salve o seu plano primeiro, aí os aportes ficam guardados juntos.', false);
   const botao = $('btn-salvar-aportes');
   botao.disabled = true;
-  const { error } = await supa.from('copa_planos').update({ aportes: aportesAtuais }).eq('user_id', usuarioAtual.id);
+  const { error } = await supa.from('copa_planos').update({ aportes: aportesAtuais, saldos: saldosAtuais }).eq('user_id', usuarioAtual.id);
   botao.disabled = false;
   if (error) return avisar('msg-caixinha', 'Não conseguimos salvar agora. Tente de novo em instantes.', false);
   planoAtual.aportes = { ...aportesAtuais };
+  planoAtual.saldos = { ...saldosAtuais };
   avisar('msg-caixinha', 'Aportes salvos!', true);
 });
 

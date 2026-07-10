@@ -76,13 +76,18 @@ function calcularPlano({ totalHoje, poupancaInicial, premissas, inicio }) {
 
 // Serie de saldos mes a mes, do inicio ate o alvo.
 // aportePorMes(chave 'YYYY-MM') deve devolver o valor aportado naquele mes (ou 0).
+// saldoPorMes (opcional) devolve um saldo informado pela pessoa no fechamento do mes;
+// quando existe, ancora a serie naquele valor e os meses seguintes partem dele.
 // Devolve [{ano, mes, saldo}], comecando pelo ponto inicial (saldo = poupancaInicial).
-function serieSaldo({ poupancaInicial, premissas, inicio, aportePorMes }) {
+function serieSaldo({ poupancaInicial, premissas, inicio, aportePorMes, saldoPorMes }) {
   const meses = mesesEntre(inicio, premissas.dataAlvo);
   const serie = [{ ano: inicio.ano, mes: inicio.mes, saldo: poupancaInicial }];
   let p = poupancaInicial;
   for (const m of meses) {
-    p = p * (1 + taxaMensal(taxaDoAno(premissas.cdi, m.ano))) + (aportePorMes(chaveMes(m)) || 0);
+    const k = chaveMes(m);
+    p = p * (1 + taxaMensal(taxaDoAno(premissas.cdi, m.ano))) + (aportePorMes(k) || 0);
+    const informado = saldoPorMes ? saldoPorMes(k) : null;
+    if (informado != null) p = informado;
     serie.push({ ano: m.ano, mes: m.mes, saldo: p });
   }
   return serie;
